@@ -57,7 +57,19 @@ Usage
                          Note: this option will not lock the screen, it displays
                          the list and exits immediately.
 
-        -n, --nofork     Do not fork swaylock after starting.
+
+    The following options are passed directly to swaylock:
+        -F, --show-failed-attempts    Show current count of failed authentication attempts.
+
+        -e, --ignore-empty-password   When an empty password is provided, do not validate it.
+
+        -K, --hide-keyboard-layout    Force hiding the current xkb layout while typing,
+                                      even if more than one layout is configured or the
+                                      show-keyboard-layout option is set.
+
+        -L, --disable-caps-lock-text  Disable the Caps Lock text.
+
+        --daemonize                   Detach from the controlling terminal after locking.
 
 example: ```swaylock-fancy -gpf Comic-Sans-MS -- scrot -z```
 
