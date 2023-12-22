@@ -17,7 +17,7 @@ declare -a outputs
 declare -a images
 
 # parse wm client for display names
-if [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
+if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
     poutputs=$(hyprctl monitors -j | jq -rc '.[] | .name')
 else
     poutputs=$(swaymsg -t get_outputs | jq -r '.[] | select(.active != false) | .name')
