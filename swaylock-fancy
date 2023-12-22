@@ -16,8 +16,13 @@ swaylock_cmd=(swaylock)
 declare -a outputs
 declare -a images
 
-# parse the json swaymsg for outputs
-poutputs=$(swaymsg -t get_outputs | jq -r '.[] | select(.active != false) | .name')
+# parse wm client for display names
+if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+    poutputs=$(hyprctl monitors -j | jq -rc '.[] | .name')
+else
+    poutputs=$(swaymsg -t get_outputs | jq -r '.[] | select(.active != false) | .name')
+fi
+
 while read -r line; do
     outputs+=($line)
     images+=($(mktemp --suffix=.png))
