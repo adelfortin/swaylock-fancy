@@ -8,7 +8,7 @@ PREFIX="${PREFIX:-$(pwd)}"
 hue=(-level "0%,100%,0.6")
 effect=(-filter Gaussian -resize 20% -define "filter:sigma=1.5" -resize 500.5%)
 # default system sans-serif font
-font=$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")
+font=$(magick -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")
 desktop=""
 swaylock_cmd=(swaylock)
 
@@ -106,7 +106,7 @@ while [[ $# > 0 ]] ; do
             esac ;;
         -t|--text) text=$2 ; shift 2 ;;
         -l|--listfonts)
-	    convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- ${PAGER:-less}
+	    magick -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- ${PAGER:-less}
 	    exit 0 ;;
         -F|-e|-K|-L|--show-failed-attempts|--ignore-empty-password|--disable-caps-lock-text|--hide-keyboard-layout|--daemonize) swaylock_cmd+=("$1"); shift ;;
         --) shift; break ;;
@@ -124,7 +124,7 @@ do
 
     value="60" #brightness value to compare to
 
-    color=$(convert "${images[$i]}" -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
+    color=$(magick "${images[$i]}" -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
     -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
 
     if (( $i == 0 )); then
@@ -153,7 +153,7 @@ do
 
     param+=("-i" "${outputs[$i]}:${images[$i]}" "-K")
 
-    convert -background none "${images[$i]}" "${hue[@]}" "${effect[@]}" -font "$font" -pointsize 26 -fill "$bw" -gravity center \
+    magick -background none "${images[$i]}" "${hue[@]}" "${effect[@]}" -font "$font" -pointsize 26 -fill "$bw" -gravity center \
         -annotate +0+160 "$text" "$icon" -gravity center -composite "${images[$i]}"
 done
 
