@@ -45,8 +45,6 @@ options="Options:
                      Note: this option will not lock the screen, it displays
                      the list and exits immediately.
 
-    -n, --nofork     Do not fork swaylock after starting.
-
     -F, --show-failed-attempts          Show the number of failed authentication attempts.
 
     -e, --ignore-empty-password         Don't validate empty passwords.
