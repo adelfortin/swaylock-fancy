@@ -6,7 +6,7 @@ set -o errexit -o noclobber -o nounset
 PREFIX="${PREFIX:-$(pwd)}"
 
 hue=(-level "0%,100%,0.6")
-effect=(-filter Gaussian -resize 20% -define "filter:sigma=1.5" -resize 500.5%)
+effect=(-filter Gaussian -resize 20% -define "filter:sigma=1.5" -resize 500%)
 # default system sans-serif font
 font=$(magick -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")
 desktop=""
@@ -66,7 +66,6 @@ temp="$(getopt -o :hdnpglt:FeLK:f: -l desktop,help,listfonts,nofork,show-failed-
 eval set -- "$temp"
 
 # l10n support
-text="Type password to unlock"
 case "${LANG:-}" in
     af_* ) text="Tik wagwoord om te ontsluit" ;; # Afrikaans
     cs_* ) text="Pro odemčení zadajte heslo" ;; # Czech
@@ -75,7 +74,7 @@ case "${LANG:-}" in
     en_* ) text="Type password to unlock" ;; # English
     es_* ) text="Ingrese su contraseña" ;; # Española
     fr_* ) text="Entrez votre mot de passe" ;; # Français
-    he_* ) text="הליענה לטבל המסיס דלקה" ;; # Hebrew עברית (convert doesn't play bidi well)
+    he_* ) text="הקלד סיסמה לביטול הנעילה" ;; # Hebrew עברית
     hi_* ) text="अनलॉक करने के लिए पासवर्ड टाईप करें" ;; #Hindi
     id_* ) text="Masukkan kata sandi Anda" ;; # Bahasa Indonesia
     it_* ) text="Inserisci la password" ;; # Italian
@@ -87,6 +86,7 @@ case "${LANG:-}" in
     sk_* ) text="Pre odomknutie zadajte heslo" ;; # Slovak
     tr_* ) text="Giriş yapmak için şifrenizi girin" ;; # Turkish
     ru_* ) text="Введите пароль" ;; # Russian
+    zh_* ) text="请输入密码以解锁" ;; # Chinese
     * ) text="Type password to unlock" ;; # Default to English
 esac
 
