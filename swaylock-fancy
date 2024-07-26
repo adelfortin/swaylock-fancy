@@ -6,9 +6,9 @@ set -o errexit -o noclobber -o nounset
 PREFIX="${PREFIX:-$(pwd)}"
 
 hue=(-level "0%,100%,0.6")
-effect=(-filter Gaussian -resize 20% -define "filter:sigma=1.5" -resize 500.5%)
+effect=(-filter Gaussian -resize 20% -define "filter:sigma=1.5" -resize 500%)
 # default system sans-serif font
-font=$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")
+font=$(magick -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")
 desktop=""
 swaylock_cmd=(swaylock)
 
@@ -45,8 +45,6 @@ options="Options:
                      Note: this option will not lock the screen, it displays
                      the list and exits immediately.
 
-    -n, --nofork     Do not fork swaylock after starting.
-
     -F, --show-failed-attempts          Show the number of failed authentication attempts.
 
     -e, --ignore-empty-password         Don't validate empty passwords.
@@ -68,7 +66,6 @@ temp="$(getopt -o :hdnpglt:FeLK:f: -l desktop,help,listfonts,nofork,show-failed-
 eval set -- "$temp"
 
 # l10n support
-text="Type password to unlock"
 case "${LANG:-}" in
     af_* ) text="Tik wagwoord om te ontsluit" ;; # Afrikaans
     cs_* ) text="Pro odemčení zadajte heslo" ;; # Czech
@@ -77,7 +74,7 @@ case "${LANG:-}" in
     en_* ) text="Type password to unlock" ;; # English
     es_* ) text="Ingrese su contraseña" ;; # Española
     fr_* ) text="Entrez votre mot de passe" ;; # Français
-    he_* ) text="הליענה לטבל המסיס דלקה" ;; # Hebrew עברית (convert doesn't play bidi well)
+    he_* ) text="הקלד סיסמה לביטול הנעילה" ;; # Hebrew עברית
     hi_* ) text="अनलॉक करने के लिए पासवर्ड टाईप करें" ;; #Hindi
     id_* ) text="Masukkan kata sandi Anda" ;; # Bahasa Indonesia
     it_* ) text="Inserisci la password" ;; # Italian
@@ -89,6 +86,7 @@ case "${LANG:-}" in
     sk_* ) text="Pre odomknutie zadajte heslo" ;; # Slovak
     tr_* ) text="Giriş yapmak için şifrenizi girin" ;; # Turkish
     ru_* ) text="Введите пароль" ;; # Russian
+    zh_* ) text="请输入密码以解锁" ;; # Chinese
     * ) text="Type password to unlock" ;; # Default to English
 esac
 
@@ -97,7 +95,7 @@ while [[ $# > 0 ]] ; do
         -h|--help)
             printf "Usage: %s [options]\n\n%s\n\n" "${0##*/}" "$options"; exit 1 ;;
         -d|--desktop) desktop=$(command -V wmctrl) ; shift ;;
-        -g|--greyscale) hue=(-level "0%,100%,0.6" -set colorspace Gray -average) ; shift ;;
+        -g|--greyscale) hue=(-level "0%,100%,0.6" -set colorspace Gray -evaluate-sequence Mean) ; shift ;;
         -p|--pixelate) effect=(-scale 10% -scale 1000%) ; shift ;;
         -f|--font)
             case "$2" in
@@ -106,7 +104,7 @@ while [[ $# > 0 ]] ; do
             esac ;;
         -t|--text) text=$2 ; shift 2 ;;
         -l|--listfonts)
-	    convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- ${PAGER:-less}
+	    magick -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- ${PAGER:-less}
 	    exit 0 ;;
         -F|-e|-K|-L|--show-failed-attempts|--ignore-empty-password|--disable-caps-lock-text|--hide-keyboard-layout|--daemonize) swaylock_cmd+=("$1"); shift ;;
         --) shift; break ;;
@@ -122,12 +120,12 @@ for (( i=0; i<${arraylen}; i++ ));
 do
     command -- "grim" -o "${outputs[$i]}" "${images[$i]}"
 
-    value="60" #brightness value to compare to
-
-    color=$(convert "${images[$i]}" -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
-    -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
-
     if (( $i == 0 )); then
+        value="60" #brightness value to compare to
+
+        color=$(magick "${images[$i]}" -gravity center -crop 100x100+0+0 +repage -resize 1x1 \
+            -colorspace hsb txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
+
         if [[ $color -gt $value ]]; then #white background image and black text
             bw="black"
             icon="$PREFIX/icons/black.svg"
@@ -153,7 +151,7 @@ do
 
     param+=("-i" "${outputs[$i]}:${images[$i]}" "-K")
 
-    convert -background none "${images[$i]}" "${hue[@]}" "${effect[@]}" -font "$font" -pointsize 26 -fill "$bw" -gravity center \
+    magick -background none "${images[$i]}" "${hue[@]}" "${effect[@]}" -font "$font" -pointsize 26 -fill "$bw" -gravity center \
         -annotate +0+160 "$text" "$icon" -gravity center -composite "${images[$i]}"
 done
 
