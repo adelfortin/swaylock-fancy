@@ -1,5 +1,5 @@
 PRGM = swaylock-fancy
-PREFIX ?= /usr
+PREFIX ?= /usr/local
 SHRDIR ?= $(PREFIX)/share
 BINDIR ?= $(PREFIX)/bin
 
